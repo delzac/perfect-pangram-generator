@@ -69,6 +69,7 @@ def find_subsets_backtracking(bitfields, objective):
           continue
       if accumulated == objective:
         yield subset
+        continue
 
       if len(array) == 0:
           continue
