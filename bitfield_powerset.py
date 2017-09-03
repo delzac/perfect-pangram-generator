@@ -34,13 +34,6 @@ def find_subsets_backtracking(bitfields, objective):
     if array_length == 0:
         continue
 
-    # enough_bits_left = accumulated
-    # for number in array:
-    #   enough_bits_left = enough_bits_left | number
-    #   if enough_bits_left >= objective:
-    #     stack.append((array[1:], accumulated, subset))
-    #     break
-
     # only include a subset that doesn't include the current bitfield
     # if we're sure that there'll be enough bits in the ensuing subset
     # to or to a saturated bitmask
