@@ -57,11 +57,20 @@ def find_subsets_backtracking(bitfields, objective):
     stack.append((filtered, included, subset + [array[0]]))
 
 if __name__ == "__main__":
+  def binary_format(num):
+    return format(num, '026b')
+
+  def test(objective, bitmasks):
+    global calls
+    calls = 0
+    print "testing: %s" % binary_format(objective)
+    for pangram in find_subsets_backtracking(bitmasks, objective):
+      print map(binary_format, pangram)
+    print "calls: %s" % calls
+
   saturated_bitmask = (1 << 26) - 1
   alphabet = []
   for i in range(26):
     alphabet.append(1 << i)
   alphabet.reverse()
-  for pangram in find_subsets_backtracking(alphabet, saturated_bitmask):
-    print pangram
-  print calls
+  test(saturated_bitmask, alphabet)
