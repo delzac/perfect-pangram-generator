@@ -5,8 +5,8 @@ def find_last_one_bit(number):
     last_one_bit_index += 1
   return last_one_bit_index
 
-def find_last_zero_bit(number):
-  last_zero_bit_index = 0
+def find_last_zero_bit(number, bit_length):
+  last_zero_bit_index = bit_length
   current_bit_index = 0
   while number > 0:
     if number & 1 == 0:
@@ -22,6 +22,7 @@ calls = 0
 def find_subsets_backtracking(bitfields, objective):
   global calls
   stack = [(bitfields, 0, [])]
+  bit_length = find_last_one_bit(objective)
 
   while stack:
     calls += 1
@@ -37,17 +38,23 @@ def find_subsets_backtracking(bitfields, objective):
     if array_length == 0:
         continue
 
+    # enough_bits_left = accumulated
+    # for number in array:
+    #   enough_bits_left = enough_bits_left | number
+    #   if enough_bits_left >= objective:
+    #     stack.append((array[1:], accumulated, subset))
+    #     break
 
     # only include a subset that doesn't include the current bitfield
     # if we're sure that there'll be enough bits in the ensuing subset
     # to or to a saturated bitmask
     if array_length > 1:
-      last_zero_in_accumulated_index = find_last_zero_bit(accumulated)
+      last_zero_in_accumulated_index = find_last_zero_bit(accumulated, bit_length)
       has_enough_bits = array[1]
       has_enough_bits_index = find_last_one_bit(has_enough_bits)
       if has_enough_bits_index >= last_zero_in_accumulated_index:
         stack.append((array[1:], accumulated, subset))
-    
+
     included = accumulated | array[0]
     filtered = []
     for bitfield in array[1:]:
@@ -57,16 +64,21 @@ def find_subsets_backtracking(bitfields, objective):
     stack.append((filtered, included, subset + [array[0]]))
 
 if __name__ == "__main__":
+  import time
+
   def binary_format(num):
     return format(num, '026b')
 
   def test(objective, bitmasks):
     global calls
+    t0 = time.time()
     calls = 0
     print "testing: %s" % binary_format(objective)
     for pangram in find_subsets_backtracking(bitmasks, objective):
       print map(binary_format, pangram)
+    t1 = time.time()
     print "calls: %s" % calls
+    print "time: %s" % (t1 - t0)
 
   saturated_bitmask = (1 << 26) - 1
   alphabet = []
