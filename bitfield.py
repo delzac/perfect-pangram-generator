@@ -1,5 +1,7 @@
 import re
 import sys
+from bitfield_dp import bitfields_dynamic_programming
+from bitfield_powerset import find_subsets_backtracking
 
 is_lowercase_letters = re.compile('^[a-z_\-]+$')
 ALPHABET_LENGTH = 26
@@ -59,43 +61,18 @@ def read_dictionary_file(filename):
         bitfield_dictionary[bitfield].append(word)
   return bitfield_dictionary
 
-def find_subsets_backtracking(bitfields, objective):
-    stack = [(bitfields, 0, [])]
-
-    while stack:
-      array, accumulated, subset = stack.pop()
-
-      if accumulated > objective:
-          continue
-      if accumulated == objective:
-        yield subset
-        continue
-
-      if len(array) == 0:
-          continue
-
-      if accumulated & array[0] == 0:
-        included = accumulated | array[0]
-        stack.append((array[1:], included, subset + [array[0]]))
-
-      enough_bits_left = accumulated
-      for number in array:
-        enough_bits_left = enough_bits_left | number
-        if enough_bits_left >= objective:
-          stack.append((array[1:], accumulated, subset))
-          break
-
-def generate_pangrams(bitfield_dictionary, alphabet_length = ALPHABET_LENGTH):
+def generate_pangrams(bitfield_dictionary, pangrams_algorithm, alphabet_length = ALPHABET_LENGTH):
   # find all combinations of keys that mask to 26 'one' bits
   bitfield_keys = bitfield_dictionary.keys()
   bitfield_keys.sort(reverse=True)
   saturated_mask = (1 << alphabet_length) - 1
 
-  for solution in find_subsets_backtracking(bitfield_keys, saturated_mask):
+  for solution in pangrams_algorithm(bitfield_keys, saturated_mask):
     yield solution
 
 if __name__ == "__main__":
-  filename = "tests/scrabble-dictionary.txt"
+  filename = "tests/worst-case.txt"
+  pangrams_algorithm = bitfields_dynamic_programming
   bitfield_dictionary = read_dictionary_file(filename)
-  for pangram in generate_pangrams(bitfield_dictionary):
+  for pangram in generate_pangrams(bitfield_dictionary, pangrams_algorithm):
     print pangram
