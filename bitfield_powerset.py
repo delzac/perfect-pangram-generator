@@ -15,17 +15,13 @@ def find_last_zero_bit(number, bit_length):
     current_bit_index += 1
   return last_zero_bit_index
 
-calls = 0
-
 # assumes a reverse ordered bitfield array
 # TODO: reduce array copies
 def find_subsets_backtracking(bitfields, objective):
-  global calls
   stack = [(bitfields, 0, [])]
   bit_length = find_last_one_bit(objective)
 
   while stack:
-    calls += 1
     array, accumulated, subset = stack.pop()
 
     if accumulated > objective:
@@ -70,14 +66,11 @@ if __name__ == "__main__":
     return format(num, '026b')
 
   def test(objective, bitmasks):
-    global calls
     t0 = time.time()
-    calls = 0
     print "testing: %s" % binary_format(objective)
     for pangram in find_subsets_backtracking(bitmasks, objective):
       print map(binary_format, pangram)
     t1 = time.time()
-    print "calls: %s" % calls
     print "time: %s" % (t1 - t0)
 
   saturated_bitmask = (1 << 26) - 1
