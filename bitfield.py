@@ -71,8 +71,8 @@ def generate_pangrams(bitfield_dictionary, pangrams_algorithm, alphabet_length =
     yield solution
 
 if __name__ == "__main__":
-  filename = "tests/worst-case.txt"
-  pangrams_algorithm = bitfields_dynamic_programming
+  filename = "tests/scrabble-dictionary.txt"
+  pangrams_algorithm = find_subsets_backtracking
   bitfield_dictionary = read_dictionary_file(filename)
   for pangram in generate_pangrams(bitfield_dictionary, pangrams_algorithm):
     print pangram

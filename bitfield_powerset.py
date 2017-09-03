@@ -1,8 +1,30 @@
+def find_last_one_bit(number):
+  last_one_bit_index = 0      
+  while number > 0:
+    number = number >> 1
+    last_one_bit_index += 1
+  return last_one_bit_index
+
+def find_last_zero_bit(number):
+  last_zero_bit_index = 0
+  current_bit_index = 0
+  while number > 0:
+    if number & 1 == 0:
+      last_zero_bit_index = current_bit_index
+    number = number >> 1
+    current_bit_index += 1
+  return last_zero_bit_index
+
+calls = 0
+
 # assumes a reverse ordered bitfield array
+# TODO: reduce array copies
 def find_subsets_backtracking(bitfields, objective):
+  global calls
   stack = [(bitfields, 0, [])]
 
   while stack:
+    calls += 1
     array, accumulated, subset = stack.pop()
 
     if accumulated > objective:
@@ -15,15 +37,24 @@ def find_subsets_backtracking(bitfields, objective):
     if array_length == 0:
         continue
 
-    if accumulated & array[0] == 0:
-      included = accumulated | array[0]
-      stack.append((array[1:], included, subset + [array[0]]))
 
-    # only keep trying subsets that have enough bits to saturate the objective
-    # this only works because we assume a reverse ordered bitfield array
-    if array_length > 1 and array[1] >= (objective >> 1):
-      stack.append((array[1:], accumulated, subset))
-      break
+    # only include a subset that doesn't include the current bitfield
+    # if we're sure that there'll be enough bits in the ensuing subset
+    # to or to a saturated bitmask
+    if array_length > 1:
+      last_zero_in_accumulated_index = find_last_zero_bit(accumulated)
+      has_enough_bits = array[1]
+      has_enough_bits_index = find_last_one_bit(has_enough_bits)
+      if has_enough_bits_index >= last_zero_in_accumulated_index:
+        stack.append((array[1:], accumulated, subset))
+    
+    included = accumulated | array[0]
+    filtered = []
+    for bitfield in array[1:]:
+      # only include this one in the subset if it wouldn't collide with a used letter
+      if bitfield & included == 0:
+        filtered.append(bitfield)
+    stack.append((filtered, included, subset + [array[0]]))
 
 if __name__ == "__main__":
   saturated_bitmask = (1 << 26) - 1
@@ -33,3 +64,4 @@ if __name__ == "__main__":
   alphabet.reverse()
   for pangram in find_subsets_backtracking(alphabet, saturated_bitmask):
     print pangram
+  print calls
